@@ -2,11 +2,14 @@
 
 const BASE_URL = import.meta.env.VITE_API_URL + "/api";
 
-// Helper function
-async function request(endpoint: string, method = "GET", data?: any) {
+// Helper function for requests
+async function request(endpoint: string, method = "GET", data?: any, token?: string) {
+  const headers: any = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   const options: RequestInit = {
     method,
-    headers: { "Content-Type": "application/json" },
+    headers,
   };
 
   if (data) options.body = JSON.stringify(data);
@@ -22,7 +25,7 @@ export function login(data: { email: string; password: string }) {
   return request("/auth/login", "POST", data);
 }
 
-export function register(data: { name: string; email: string; password: string }) {
+export function register(data: { name: string; email?: string; password: string }) {
   return request("/auth/register", "POST", data);
 }
 
@@ -34,62 +37,28 @@ export function forgotPassword(email: string) {
    PROFILE
 -------------------------- */
 export function getProfile(token: string) {
-  return fetch(`${BASE_URL}/user/profile`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then((res) => res.json());
+  return request("/user/profile", "GET", undefined, token);
 }
 
 export function updateProfile(token: string, data: any) {
-  return fetch(`${BASE_URL}/user/profile`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  }).then((res) => res.json());
+  return request("/user/profile", "PUT", data, token);
 }
 
 /* -------------------------
    MEDICINES
 -------------------------- */
 export function getMedicines(token: string) {
-  return fetch(`${BASE_URL}/medicine`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then((res) => res.json());
+  return request("/medicine", "GET", undefined, token);
 }
 
 export function addMedicine(token: string, data: any) {
-  return fetch(`${BASE_URL}/medicine`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  }).then((res) => res.json());
+  return request("/medicine", "POST", data, token);
 }
 
 export function updateMedicine(token: string, id: string, data: any) {
-  return fetch(`${BASE_URL}/medicine/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  }).then((res) => res.json());
+  return request(`/medicine/${id}`, "PUT", data, token);
 }
 
 export function deleteMedicine(token: string, id: string) {
-  return fetch(`${BASE_URL}/medicine/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then((res) => res.json());
+  return request(`/medicine/${id}`, "DELETE", undefined, token);
 }
