@@ -253,7 +253,7 @@ const App: React.FC = () => {
     setMedDosage(medicine.dosage);
     setMedFrequency(medicine.frequency);
     setMedType(medicine.type || 'Tablet');
-    setEditingId(medicine._id);
+    setEditingId(medicine._id || '');
   };
 
   const handleCancelEdit = () => {
@@ -261,7 +261,7 @@ const App: React.FC = () => {
     setMedDosage('');
     setMedFrequency('');
     setMedType('Tablet');
-    setEditingId(null);
+    setEditingId('');
   };
 
   const handleSaveMedicine = async (e: React.FormEvent) => {
@@ -317,7 +317,8 @@ const App: React.FC = () => {
     } catch (err: any) {
       alert(err.message || 'Failed to delete medicine');
     } finally {
-      setDeletingId(null);
+      // FIX: deletingId is a string state, so reset to empty string, not null
+      setDeletingId("");
     }
   };
 
