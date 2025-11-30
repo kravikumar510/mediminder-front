@@ -1,119 +1,95 @@
-import { LoginData, RegisterData, MedicineData, AuthResponse, Medicine } from '../types';
+// services/api.ts
 
-const API_BASE_URL = 'https://mediminder-backend-ks06.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_URL + "/api";
 
-
-const getHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-  };
-};
-
-const handleResponse = async (response: Response) => {
-  let text = '';
-  try {
-    text = await response.text();
-  } catch {
-    throw new Error("Network error: Failed to read response from server.");
-  }
-
-  let data;
-  try {
-    data = text ? JSON.parse(text) : {};
-  } catch {
-    const lower = text.toLowerCase().trim();
-    if (lower.startsWith('<!doctype') || lower.startsWith('<html')) {
-      if (response.status === 404) throw new Error("Server endpoint not found (404)");
-      if (response.status === 500) throw new Error("Internal Server Error (500)");
-      throw new Error(`Invalid HTML response (${response.status})`);
-    }
-    throw new Error(`Invalid response: ${text.substring(0, 40)}...`);
-  }
-
-  if (!response.ok) {
-    throw new Error(data.message || data.error || `Request failed: ${response.status}`);
-  }
-
-  return data;
-};
-
-export const registerUser = async (data: RegisterData): Promise<AuthResponse> => {
-  const payload: any = {
-    username: data.username,
-    name: data.username,
-    password: data.password
+// Helper function
+async function request(endpoint: string, method = "GET", data?: any) {
+  const options: RequestInit = {
+    method,
+    headers: { "Content-Type": "application/json" },
   };
 
-  if (data.email) payload.email = data.email;
-  if (data.phone) payload.phone = data.phone;
+  if (data) options.body = JSON.stringify(data);
 
-  const response = await fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const res = await fetch(`${BASE_URL}${endpoint}`, options);
+  return res.json();
+}
 
-  return await handleResponse(response);
-};
+/* -------------------------
+   AUTH
+-------------------------- */
+export function login(data: { email: string; password: string }) {
+  return request("/auth/login", "POST", data);
+}
 
-export const loginUser = async (data: LoginData): Promise<AuthResponse> => {
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),   // username + password
-  });
+export function register(data: { name: string; email: string; password: string }) {
+  return request("/auth/register", "POST", data);
+}
 
-  return await handleResponse(response);
-};
+export function forgotPassword(email: string) {
+  return request("/auth/forgot-password", "POST", { email });
+}
 
-export const forgotPassword = async (email: string): Promise<any> => {
-  try {
-    const response = await fetch(`${API_URL}/auth/forgot-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    return await handleResponse(response);
-  } catch (error: any) {
-    if (error.message.includes('404')) {
-      return { message: "If this email exists, a reset link was sent." };
-    }
-    throw error;
-  }
-};
+/* -------------------------
+   PROFILE
+-------------------------- */
+export function getProfile(token: string) {
+  return fetch(`${BASE_URL}/user/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((res) => res.json());
+}
 
-export const addMedicine = async (data: MedicineData): Promise<Medicine> => {
-  const response = await fetch(`${API_URL}/medicines`, {
-    method: 'POST',
-    headers: getHeaders(),
+export function updateProfile(token: string, data: any) {
+  return fetch(`${BASE_URL}/user/profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify(data),
-  });
-  return await handleResponse(response);
-};
+  }).then((res) => res.json());
+}
 
-export const getMedicines = async (): Promise<Medicine[]> => {
-  const response = await fetch(`${API_URL}/medicines`, {
-    method: 'GET',
-    headers: getHeaders(),
-  });
-  return await handleResponse(response);
-};
+/* -------------------------
+   MEDICINES
+-------------------------- */
+export function getMedicines(token: string) {
+  return fetch(`${BASE_URL}/medicine`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((res) => res.json());
+}
 
-export const updateMedicine = async (id: string, data: Partial<MedicineData>): Promise<Medicine> => {
-  const response = await fetch(`${API_URL}/medicines/${id}`, {
-    method: 'PUT',
-    headers: getHeaders(),
+export function addMedicine(token: string, data: any) {
+  return fetch(`${BASE_URL}/medicine`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify(data),
-  });
-  return await handleResponse(response);
-};
+  }).then((res) => res.json());
+}
 
-export const deleteMedicine = async (id: string): Promise<void> => {
-  const response = await fetch(`${API_URL}/medicines/${id}`, {
-    method: 'DELETE',
-    headers: getHeaders(),
-  });
-  await handleResponse(response);
-};
+export function updateMedicine(token: string, id: string, data: any) {
+  return fetch(`${BASE_URL}/medicine/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  }).then((res) => res.json());
+}
+
+export function deleteMedicine(token: string, id: string) {
+  return fetch(`${BASE_URL}/medicine/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((res) => res.json());
+}
