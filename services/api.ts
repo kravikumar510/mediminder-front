@@ -2,17 +2,29 @@
 
 const BASE_URL = import.meta.env.VITE_API_URL + "/api";
 
-// Helper function for requests
-async function request(endpoint: string, method = "GET", data?: any, token?: string) {
-  const headers: any = { "Content-Type": "application/json" };
-  if (token) headers.Authorization = `Bearer ${token}`;
+// Generic helper for all API requests
+async function request(
+  endpoint: string,
+  method: string = "GET",
+  data?: any,
+  token?: string
+) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   const options: RequestInit = {
     method,
     headers,
   };
 
-  if (data) options.body = JSON.stringify(data);
+  if (data) {
+    options.body = JSON.stringify(data);
+  }
 
   const res = await fetch(`${BASE_URL}${endpoint}`, options);
   return res.json();
@@ -21,11 +33,17 @@ async function request(endpoint: string, method = "GET", data?: any, token?: str
 /* -------------------------
    AUTH
 -------------------------- */
+
 export function login(data: { email: string; password: string }) {
   return request("/auth/login", "POST", data);
 }
 
-export function register(data: { name: string; email?: string; password: string }) {
+export function register(data: {
+  name: string;
+  email?: string;
+  phone?: string;
+  password: string;
+}) {
   return request("/auth/register", "POST", data);
 }
 
@@ -36,6 +54,7 @@ export function forgotPassword(email: string) {
 /* -------------------------
    PROFILE
 -------------------------- */
+
 export function getProfile(token: string) {
   return request("/user/profile", "GET", undefined, token);
 }
@@ -47,6 +66,7 @@ export function updateProfile(token: string, data: any) {
 /* -------------------------
    MEDICINES
 -------------------------- */
+
 export function getMedicines(token: string) {
   return request("/medicine", "GET", undefined, token);
 }
