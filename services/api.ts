@@ -1,6 +1,6 @@
 import { LoginData, RegisterData, MedicineData, AuthResponse, Medicine } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = 'https://mediminder-backend-ks06.onrender.com';
 
 
 const getHeaders = () => {
