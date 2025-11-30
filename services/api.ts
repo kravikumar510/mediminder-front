@@ -1,6 +1,7 @@
 import { LoginData, RegisterData, MedicineData, AuthResponse, Medicine } from '../types';
 
-const API_URL = "https://mediminder-backend-ks06.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
+
 
 const getHeaders = () => {
   const token = localStorage.getItem('token');
