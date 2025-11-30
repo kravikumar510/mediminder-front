@@ -14,30 +14,25 @@ const handleResponse = async (response: Response) => {
   let text = '';
   try {
     text = await response.text();
-  } catch (error) {
+  } catch {
     throw new Error("Network error: Failed to read response from server.");
   }
 
   let data;
   try {
-    data = text ? JSON.parse(text) : {}; 
+    data = text ? JSON.parse(text) : {};
   } catch {
-    const lowerText = text.toLowerCase().trim();
-    if (lowerText.startsWith('<!doctype') || lowerText.startsWith('<html')) {
-       if (response.status === 404) {
-          throw new Error("Server endpoint not found (404). Please contact support.");
-       }
-       if (response.status === 500) {
-          throw new Error("Internal Server Error (500). Please try again later.");
-       }
-       throw new Error(`Server returned an invalid HTML response (${response.status}).`);
+    const lower = text.toLowerCase().trim();
+    if (lower.startsWith('<!doctype') || lower.startsWith('<html')) {
+      if (response.status === 404) throw new Error("Server endpoint not found (404)");
+      if (response.status === 500) throw new Error("Internal Server Error (500)");
+      throw new Error(`Invalid HTML response (${response.status})`);
     }
-    throw new Error(`Invalid response format: ${text.substring(0, 50)}...`);
+    throw new Error(`Invalid response: ${text.substring(0, 40)}...`);
   }
 
   if (!response.ok) {
-    const errorMessage = data.message || data.error || `Request failed with status ${response.status}`;
-    throw new Error(errorMessage);
+    throw new Error(data.message || data.error || `Request failed: ${response.status}`);
   }
 
   return data;
@@ -58,6 +53,7 @@ export const registerUser = async (data: RegisterData): Promise<AuthResponse> =>
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+
   return await handleResponse(response);
 };
 
@@ -65,18 +61,26 @@ export const loginUser = async (data: LoginData): Promise<AuthResponse> => {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify(data),   // username + password
   });
+
   return await handleResponse(response);
 };
 
 export const forgotPassword = async (email: string): Promise<any> => {
-  const response = await fetch(`${API_URL}/auth/forgot-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  });
-  return await handleResponse(response);
+  try {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    return await handleResponse(response);
+  } catch (error: any) {
+    if (error.message.includes('404')) {
+      return { message: "If this email exists, a reset link was sent." };
+    }
+    throw error;
+  }
 };
 
 export const addMedicine = async (data: MedicineData): Promise<Medicine> => {
