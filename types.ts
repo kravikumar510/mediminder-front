@@ -34,7 +34,7 @@ export interface AuthResponse {
 }
 
 export interface LoginData {
-  username: string;   // 🔥 FIXED: backend uses username, not email
+  email: string;   // 🔥 FIXED: backend uses username, not email
   password: string;
 }
 
