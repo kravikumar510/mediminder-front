@@ -1,22 +1,30 @@
 export interface User {
   _id: string;
-  id?: string; // Some backends return id instead of _id
+  id?: string;
   username: string;
-  name?: string; // Some backends use name
-  email: string;
+  name?: string;
+  email?: string;
   token?: string;
-  avatar?: string; // Local storage or backend provided
+  avatar?: string;
 }
 
-export type MedicineType = 'Tablet' | 'Capsule' | 'Syrup' | 'Injection' | 'Drops' | 'Inhaler' | 'Cream' | 'Other';
+export type MedicineType =
+  | 'Tablet'
+  | 'Capsule'
+  | 'Syrup'
+  | 'Injection'
+  | 'Drops'
+  | 'Inhaler'
+  | 'Cream'
+  | 'Other';
 
 export interface Medicine {
   _id: string;
   name: string;
   dosage: string;
   frequency: string;
-  type?: MedicineType; // New field
-  user: string; // User ID
+  type?: MedicineType;
+  user: string;
   createdAt?: string;
 }
 
@@ -26,7 +34,7 @@ export interface AuthResponse {
 }
 
 export interface LoginData {
-  email: string;
+  username: string;   // 🔥 FIXED: backend uses username, not email
   password: string;
 }
 
