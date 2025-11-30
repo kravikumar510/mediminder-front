@@ -53,10 +53,10 @@ const App: React.FC = () => {
   const [medDosage, setMedDosage] = useState('');
   const [medFrequency, setMedFrequency] = useState('');
   const [medType, setMedType] = useState<MedicineType>('Tablet');
-  const [editingId, setEditingId] = useState<string | null>(null); // For update logic
+  const [editingId, setEditingId] = useState<string>(""); // For update logic
   const [isMedLoading, setIsMedLoading] = useState(false);
   const [loadingMeds, setLoadingMeds] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string>("");
 
   // Profile State
   const [avatar, setAvatar] = useState(AVATARS[0]);
