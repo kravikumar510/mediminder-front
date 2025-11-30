@@ -267,7 +267,7 @@ const App: React.FC = () => {
   const handleSaveMedicine = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    const userId = user._id || user.id;
+   const userId = (user._id || user.id || "").toString();
     
     setIsMedLoading(true);
     try {
